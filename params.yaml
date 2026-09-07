@@ -1,0 +1,97 @@
+paths:
+  population: data/comstock-nyc-offices/population/population.csv
+  loads: data/comstock-nyc-offices/population/loads_kw_15min_2018.parquet
+  nyiso: data/comstock-nyc-offices/nyiso/zonej_2018_hourly_est.csv
+  gas_tariff: data/rates/coned_gas_sc2_sc9_nyc_2026.json
+  rate_i_components: data/coned_tariffs/csv/sc9_rate1_lt_nyc_ra332_long.csv
+  rate_ii_components: data/coned_tariffs/csv/sc9_rate2_tou_nyc_ra9567_long.csv
+  icap_spot: data/nyiso_icap/nyc_icap_spot_monthly.csv
+  asp: data/nyiso_asp/nyiso_asp_2018_hourly.csv
+
+population:
+  subtype: largeoffice_datacenter
+  heating_fuel: Electricity
+  exclude_district_energy: true
+  n_source: 178
+  n_expected: 14
+
+electric:
+  rate: Rate II
+  rate_ii_mandatory_above_kw: 1500
+  components_as_of: '2026-08-01'
+  summer_months: [6, 7, 8, 9]
+  demand_intervals_15min: 2
+  rider_m_loss_factor: 1.061
+  rateacuity_loss_row_pct: 6.6
+  registers:
+    summer_wd_0800_1800: {months: summer, weekdays: true,  hours: [8, 18]}
+    summer_wd_0800_2200: {months: summer, weekdays: true,  hours: [8, 22]}
+    summer_all_hours:    {months: summer, weekdays: false, hours: [0, 24]}
+    winter_wd_0800_2200: {months: winter, weekdays: true,  hours: [8, 22]}
+    winter_all_hours:    {months: winter, weekdays: false, hours: [0, 24]}
+  adder_register:  {months: all, weekdays: true,  hours: [8, 22]}
+  rate_i_register: {months: all, weekdays: false, hours: [0, 24]}
+  rate_i_demand_usd_per_kw: {summer: 44.05, winter: 34.50}
+  rate_ii_demand_usd_per_kw:
+    summer_wd_0800_1800: 11.33
+    summer_wd_0800_2200: 22.82
+    summer_all_hours: 20.61
+    winter_wd_0800_2200: 19.41
+    winter_all_hours: 5.85
+
+gas:
+  rate: Rate I
+  commodity_usd_per_therm: 0.5533     # EIA New York citygate, 2018 mean
+
+battery:
+  sizing_multiplier: 1.15
+  duration_h: 4.0
+  roundtrip_efficiency_ac: 0.90
+  inverter_ac_dc_conversion: 0.975
+  capex_usd_per_kw_dc: 2276.0
+  om_usd_per_kw_dc_yr: 56.91
+
+gas_engine:
+  sizing_multiplier: 1.15
+  redundancy_factor: 2.0
+  capex_usd_per_kw_ac: 2065.44
+  om_usd_per_kwh_ac: 0.02
+  heat_rate_btu_per_kwh_hhv: 9210
+  btu_per_therm: 100000
+
+drv:
+  rate_usd_per_kwh: 0.85360
+  season_start: '06-24'
+  season_end: '09-15'
+  call_window_start_hour: 11
+  call_window_end_hour: 15
+  loss_adjustment_applied: true
+
+capacity:
+  duration_factor: 0.7853             # 2025/26 CAF, 4-hour EDL
+  availability_factor: 0.975
+  icap_block_hours: [12, 16]
+
+der:
+  ecbl_like_weekdays: 10
+  ecbl_iterations: 2
+  reserve_product: spin_10min_usd_per_mwh
+  reserve_sustain_hours: 1.0
+
+reliability:
+  saifi_per_yr: 0.1317
+  caidi_hours: 2.245
+  voll_usd_per_kwh:                   # 2026 dollars, by interruption duration
+    0.0833: 271.11
+    0.5: 53.17
+    1.0: 30.99
+    4.0: 17.20
+    8.0: 18.34
+    16.0: 18.05
+
+finance:
+  analysis_years: 15
+  discount_rate_nominal: {low: 0.0436, central: 0.0741, high: 0.0971}
+  escalation:
+    cpi: 0.0245
+    drv_rate: 0.0
